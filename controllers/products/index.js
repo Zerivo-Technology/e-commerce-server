@@ -1,10 +1,10 @@
 const { PrismaClient } = require('@prisma/client');
-const { createClient } = require('@supabase/supabase-js');
 const prisma = new PrismaClient();
-require('dotenv').config();
-const supabaseUrl = 'https://zxbxtnkyleblalhoknyk.supabase.co'
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4Ynh0bmt5bGVibGFsaG9rbnlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE2NDEwMjksImV4cCI6MjA0NzIxNzAyOX0.H3x6OJ8JZiM9Q9B9LHHtgGjDKB-cdtigIOmalRTTd0U";
+const { createClient } = require('@supabase/supabase-js');
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
+const { returnSuccess, returnError } = require('../../helpers/responseHandler');
 
 class ProductsControllers {
 
@@ -66,18 +66,14 @@ class ProductsControllers {
     static async getProducts(req, res, next) {
         try {
             const getProduct = await prisma.products.findMany();
-            return res.status(200).json({
-                status: 200,
-                message: "Get Products Successfully",
-                data: getProduct
-            });
+            const response = returnSuccess(200, "Get Products Successfully, new Response", getProduct)
+            // -- Return Response  -- //
+            return res.status(response.statusCode).json(response.response)
         } catch (error) {
             console.error('Error get product:', error);
-            return res.status(500).json({
-                status: 500,
-                message: 'Get Product Failed',
-                error: error.message || error
-            });
+            const response = returnError(400, "Get Products Failed")
+            // -- Return Response  -- //
+            return res.status(response.statusCode).json(response.response);
         }
     }
 
@@ -89,11 +85,9 @@ class ProductsControllers {
                     id: id
                 }
             })
-            res.status(200).json({
-                status: 200,
-                message: "Get Product By Id Successfully",
-                data: productById
-            })
+            const response = returnSuccess(200, "Get Products by Id Successfully", productById)
+            // -- Return Response  -- //
+            res.status(response.statusCode).json(response.response)
         } catch (error) {
             console.log(error)
         }

@@ -18,6 +18,7 @@ model User {
   providerId  String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  carts       Cart[] 
 }
 
 model Products {
@@ -29,6 +30,7 @@ model Products {
   image       String
   quantity    String
   price       String
+  cart        Cart[]
 }
 
 enum Category {
@@ -46,4 +48,47 @@ enum Age {
   MEN
   WOMEN
   KIDS
+}
+
+
+model Cart {
+  id              String @id @default(uuid())
+  productId       String
+  userId          String
+  products        Products @relation(references: [id], fields: [productId], onDelete: Cascade)  
+  user            User @relation(references: [id], fields: [userId], onDelete: Cascade)
+  quantity        String
+}
+
+model Coupon {
+  id              String @id @default(uuid())
+  name            String 
+  cut_price       String
+}
+
+model Transaction {
+  id              String @id @default(uuid())
+  userId          String
+  cartId          String
+  total           String
+  payment_method  String
+  payment_status  Status_Payment
+  payment_time    DateTime @default(now())
+  created_at      DateTime @default(now())
+}
+
+enum Status_Payment {
+  pending
+  paid
+  failed
+  canceled
+}
+
+model Chat {
+  id             String   @id @default(uuid())
+  senderId       String
+  receiveId      String
+  message        String
+  sent_at        DateTime @default(now())
+  read_status    Boolean
 }

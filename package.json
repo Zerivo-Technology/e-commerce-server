@@ -4,7 +4,8 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "nodemon --watch server.js"
+    "serve": "nodemon --watch server.js",
+    "seed": "node prisma/seed.js"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,7 @@
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "google-auth-library": "^9.15.0",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1"
   },

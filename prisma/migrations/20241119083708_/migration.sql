@@ -1,7 +1,4 @@
 -- CreateEnum
-CREATE TYPE "Category" AS ENUM ('BAG', 'SHOES', 'JACKET', 'CLOTHES', 'SHORTS_PANTS', 'LONG_PANTS', 'POLO', 'SPECIAL_PRODUCTS');
-
--- CreateEnum
 CREATE TYPE "Age" AS ENUM ('MEN', 'WOMEN', 'KIDS');
 
 -- CreateEnum
@@ -16,6 +13,7 @@ CREATE TABLE "User" (
     "phoneNumber" TEXT,
     "role" TEXT NOT NULL,
     "provider" TEXT NOT NULL,
+    "googleId" TEXT,
     "providerId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -28,13 +26,21 @@ CREATE TABLE "Products" (
     "id" TEXT NOT NULL,
     "nameProduct" TEXT,
     "about" TEXT,
-    "category" "Category" NOT NULL,
+    "categoryId" INTEGER NOT NULL,
     "age" "Age" NOT NULL,
     "image" TEXT NOT NULL,
     "quantity" TEXT NOT NULL,
     "price" TEXT NOT NULL,
 
     CONSTRAINT "Products_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Category" (
+    "id" SERIAL NOT NULL,
+    "nameCategory" TEXT NOT NULL,
+
+    CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -86,7 +92,16 @@ CREATE TABLE "Chat" (
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- AddForeignKey
+ALTER TABLE "Products" ADD CONSTRAINT "Products_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Cart" ADD CONSTRAINT "Cart_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Cart" ADD CONSTRAINT "Cart_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_cartId_fkey" FOREIGN KEY ("cartId") REFERENCES "Cart"("id") ON DELETE CASCADE ON UPDATE CASCADE;

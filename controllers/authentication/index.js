@@ -1,9 +1,8 @@
-const { OAuth2Client } = require('google-auth-library');
+const googleClient = require('../../helpers/google-auth');
+require('dotenv').config()
 const { PrismaClient } = require('@prisma/client');
-const { signToken } = require('../../helpers/jwt'); // Pastikan fungsi ini benar
-
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-const prisma = new PrismaClient(); // Inisialisasi Prisma Client
+const { signToken } = require('../../helpers/jwt');
+const prisma = new PrismaClient();
 
 class googleAuthControllers {
     static async authenticationGoogle(req, res, next) {
@@ -17,10 +16,9 @@ class googleAuthControllers {
         }
 
         try {
-            // Verifikasi token Google
             const ticket = await googleClient.verifyIdToken({
                 idToken: token,
-                audience: process.env.GOOGLE_CLIENT_ID || '',
+                audience: process.env.GOOGLE_CLIENT_ID,
             });
 
             const payload = ticket.getPayload();
@@ -28,36 +26,31 @@ class googleAuthControllers {
                 id_google: payload.sub,
                 fullName: payload.name,
                 email: payload.email,
-                image: payload.picture,
                 time: new Date(),
             };
 
-            // Cek apakah pengguna sudah ada di database
             let user = await prisma.user.findUnique({
                 where: { email: userPayload.email },
             });
 
             if (!user) {
-                // Jika pengguna belum ada, buat data baru
                 user = await prisma.user.create({
                     data: {
                         googleId: userPayload.id_google,
                         name: userPayload.fullName,
                         email: userPayload.email,
-                        imageUrl: userPayload.image,
-                        role: 'user', // Role default
+                        provider: 'google',
+                        role: 'user',
                     },
                 });
             }
 
-            // Buat access token menggunakan fungsi signToken
             const access_token = signToken({
                 id: user.id,
                 email: user.email,
                 role: user.role,
             });
 
-            // Kirimkan respons sukses
             res.status(200).json({
                 status: 200,
                 message: 'Authentication Successfully',
@@ -74,6 +67,14 @@ class googleAuthControllers {
                 message: 'Authentication Failed',
                 error: error.message,
             });
+        }
+    }
+
+    static async authenticationFacebook(req, res, next){
+        try{
+
+        }catch(error){
+            
         }
     }
 }

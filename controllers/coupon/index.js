@@ -37,6 +37,23 @@ class CouponControllers {
         }
     }
 
+    static async deleteCoupon(req, res, next) {
+        const { id } = req.params;
+        try {
+            const couponId = await Prisma.coupon.delete({
+                where: {
+                    id: id
+                }
+            });
+
+            const response = returnSuccess(200, 'Delete Coupon Successfully', couponId);
+            res.status(response.statusCode).json(response.response);
+        } catch (error) {
+            const response = returnError(400, 'Delete Coupon failed', error);
+            res.status(response.statusCode).json(response.response);
+        }
+    }
+
 }
 
 module.exports = CouponControllers

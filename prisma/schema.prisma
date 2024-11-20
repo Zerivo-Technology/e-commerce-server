@@ -8,40 +8,38 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(uuid())
-  name        String?
-  email       String?  @unique
-  password    String?
-  phoneNumber String?
-  role        String
-  provider    String
-  providerId  String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  carts       Cart[] 
+  id                  String   @id @default(uuid())
+  name                String?
+  email               String?  @unique
+  password            String?
+  phoneNumber         String?
+  role                String
+  provider            String
+  googleId            String?
+  providerId          String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  carts               Cart[]
+  transactions        Transaction[]
 }
 
 model Products {
   id          String   @id @default(uuid())
   nameProduct String?
   about       String?
-  category    Category
+  categoryId  Int
+  category    Category @relation(references: [id], fields: [categoryId], onDelete: Cascade)
   age         Age
   image       String
   quantity    String
   price       String
-  cart        Cart[]
+  carts       Cart[]
 }
 
-enum Category {
-  BAG
-  SHOES
-  JACKET
-  CLOTHES
-  SHORTS_PANTS
-  LONG_PANTS
-  POLO
-  SPECIAL_PRODUCTS
+model Category{
+  id              Int @id @default(autoincrement())
+  nameCategory    String
+  products        Products[]
 }
 
 enum Age {
@@ -58,6 +56,7 @@ model Cart {
   products        Products @relation(references: [id], fields: [productId], onDelete: Cascade)  
   user            User @relation(references: [id], fields: [userId], onDelete: Cascade)
   quantity        String
+  transactions    Transaction[]
 }
 
 model Coupon {
@@ -69,7 +68,9 @@ model Coupon {
 model Transaction {
   id              String @id @default(uuid())
   userId          String
+  users           User @relation(references: [id], fields: [userId], onDelete: Cascade)
   cartId          String
+  carts           Cart @relation(references: [id], fields: [cartId], onDelete: Cascade)
   total           String
   payment_method  String
   payment_status  Status_Payment

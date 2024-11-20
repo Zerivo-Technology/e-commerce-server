@@ -38,7 +38,9 @@ class ProductsControllers {
                 data: {
                     nameProduct,
                     about,
-                    category,
+                    category: {
+                        connect: { id: parseInt(category, 10) },
+                    },
                     age,
                     quantity,
                     price,
@@ -87,6 +89,23 @@ class ProductsControllers {
             })
             const response = returnSuccess(200, "Get Products by Id Successfully", productById)
             // -- Return Response  -- //
+            res.status(response.statusCode).json(response.response)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    static async deleteProducts(req, res, next) {
+        const { id } = req.params
+        try {
+            const deleteProducts = await prisma.products.delete({
+                where: {
+                    id: id
+                }
+            })
+
+            const response = returnSuccess(200, 'Delete Product Successfully', deleteProducts)
+
             res.status(response.statusCode).json(response.response)
         } catch (error) {
             console.log(error)

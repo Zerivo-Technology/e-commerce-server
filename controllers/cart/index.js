@@ -3,51 +3,61 @@ const Prisma = new PrismaClient();
 const { returnSuccess, returnError } = require('../../helpers/responseHandler');
 class CartControllers {
     static async addCartProducts(req, res, next) {
-        const { id } = req.params;
-        const userId = req.user.id;
+        const { idProduct } = req.body;
+        const userId = req.user?.id;
+
+        if (!idProduct || !userId) {
+            return res.status(400).json({
+                statusCode: 400,
+                message: 'Invalid input: Product ID and User ID are required',
+            });
+        }
 
         try {
-
             const existingCartItem = await Prisma.cart.findFirst({
                 where: {
-                    productId: id,
-                    userId: userId
-                }
+                    productId: idProduct,
+                    userId: userId,
+                },
             });
 
             if (existingCartItem) {
                 const updatedCartItem = await Prisma.cart.update({
                     where: {
-                        id: existingCartItem.id
+                        id: existingCartItem.id,
                     },
                     data: {
-                        quantity: (parseInt(existingCartItem.quantity) + 1).toString()
-                    }
+                        quantity: (parseInt(existingCartItem.quantity, 10) + 1).toString(),
+                    },
                 });
 
-                const response = returnSuccess(200, 'Product quantity updated successfully', updatedCartItem);
-                return res.status(response.statusCode).json(response.response);
+                return res.status(200).json({
+                    statusCode: 200,
+                    message: 'Product quantity updated successfully',
+                    data: updatedCartItem,
+                });
             } else {
-
                 const addCart = await Prisma.cart.create({
                     data: {
-                        productId: id,
+                        productId: idProduct,
                         userId: userId,
-                        quantity: "1"
-                    }
+                        quantity: "1",
+                    },
                 });
 
-                const response = returnSuccess(200, 'Product added to cart successfully', addCart);
-                // -- Return Response -- //
-                return res.status(response.statusCode).json(response.response);
+                return res.status(200).json({
+                    statusCode: 200,
+                    message: 'Product added to cart successfully',
+                    data: addCart,
+                });
             }
-
-            next();
         } catch (error) {
-            const response = returnError(400, 'Add Cart Products failed', error);
-            // -- Return Response -- //
-            return res.status(response.statusCode).json(response.response);
-            next();
+            console.error('Error adding product to cart:', error);
+            return res.status(500).json({
+                statusCode: 500,
+                message: 'Add Cart Products failed',
+                error: error.message,
+            });
         }
     }
 

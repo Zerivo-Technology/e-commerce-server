@@ -34,7 +34,7 @@ class ProductsControllers {
                 .from('imagesProducts')
                 .getPublicUrl(filePath);
 
-            const newProduct = await prisma.products.create({
+            const newProduct = await prisma.product.create({
                 data: {
                     nameProduct,
                     about,
@@ -42,8 +42,8 @@ class ProductsControllers {
                         connect: { id: parseInt(category, 10) },
                     },
                     age,
-                    quantity,
-                    price,
+                    quantity: parseInt(quantity),
+                    price: parseFloat(price),
                     image: publicURL.publicUrl
                 }
             });
@@ -67,7 +67,7 @@ class ProductsControllers {
 
     static async getProducts(req, res, next) {
         try {
-            const getProduct = await prisma.products.findMany();
+            const getProduct = await prisma.product.findMany()
             const response = returnSuccess(200, "Get Products Successfully, new Response", getProduct)
             // -- Return Response  -- //
             return res.status(response.statusCode).json(response.response)
@@ -82,7 +82,7 @@ class ProductsControllers {
     static async getProductById(req, res, next) {
         const { id } = req.params
         try {
-            const productById = await prisma.products.findUnique({
+            const productById = await prisma.product.findUnique({
                 where: {
                     id: id
                 }
@@ -98,7 +98,7 @@ class ProductsControllers {
     static async deleteProducts(req, res, next) {
         const { id } = req.params
         try {
-            const deleteProducts = await prisma.products.delete({
+            const deleteProducts = await prisma.product.delete({
                 where: {
                     id: id
                 }

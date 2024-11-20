@@ -8,38 +8,41 @@ datasource db {
 }
 
 model User {
-  id                  String   @id @default(uuid())
-  name                String?
-  email               String?  @unique
-  password            String?
-  phoneNumber         String?
-  role                String
-  provider            String
-  googleId            String?
-  providerId          String?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  carts               Cart[]
-  transactions        Transaction[]
+  id            String   @id @default(uuid())
+  name          String?
+  email         String?  @unique
+  password      String?
+  phoneNumber   String?
+  role          String
+  provider      String
+  googleId      String?
+  providerId    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  carts         Cart[]
+  transactions  Transaction[]
+  sentChats     Chat[]   @relation("ChatSender")
+  receivedChats Chat[]   @relation("ChatReceiver")
 }
 
-model Products {
-  id          String   @id @default(uuid())
-  nameProduct String?
-  about       String?
-  categoryId  Int
-  category    Category @relation(references: [id], fields: [categoryId], onDelete: Cascade)
-  age         Age
-  image       String
-  quantity    String
-  price       String
-  carts       Cart[]
+model Product {
+  id             String   @id @default(uuid())
+  nameProduct    String?
+  about          String?
+  categoryId     Int
+  category       Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  age            Age
+  image          String
+  quantity       Int
+  price          Float
+  carts          Cart[]
+  transactionItems TransactionItem[]
 }
 
-model Category{
-  id              Int @id @default(autoincrement())
-  nameCategory    String
-  products        Products[]
+model Category {
+  id           Int       @id @default(autoincrement())
+  nameCategory String
+  products     Product[]
 }
 
 enum Age {
@@ -48,48 +51,56 @@ enum Age {
   KIDS
 }
 
-
 model Cart {
-  id              String @id @default(uuid())
-  productId       String
-  userId          String
-  products        Products @relation(references: [id], fields: [productId], onDelete: Cascade)  
-  user            User @relation(references: [id], fields: [userId], onDelete: Cascade)
-  quantity        String
-  transactions    Transaction[]
+  id          String   @id @default(uuid())
+  productId   String
+  userId      String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quantity    Int
 }
 
 model Coupon {
-  id              String @id @default(uuid())
-  name            String 
-  cut_price       String
+  id         String @id @default(uuid())
+  name       String
+  cut_price  Float
 }
 
 model Transaction {
-  id              String @id @default(uuid())
-  userId          String
-  users           User @relation(references: [id], fields: [userId], onDelete: Cascade)
-  cartId          String
-  carts           Cart @relation(references: [id], fields: [cartId], onDelete: Cascade)
-  total           String
-  payment_method  String
-  payment_status  Status_Payment
-  payment_time    DateTime @default(now())
-  created_at      DateTime @default(now())
+  id                String          @id @default(uuid())
+  total             Int
+  paymentMethod     String
+  paymentStatus     Boolean         @default(false)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  transactionItems  TransactionItem[]
+  userId            String
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-enum Status_Payment {
-  pending
-  paid
-  failed
-  canceled
+model TransactionItem {
+  id            Int       @id @default(autoincrement())
+  transactionId String
+  productId     String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity      Int         @default(1)
+}
+
+enum StatusPayment {
+  PENDING
+  PAID
+  FAILED
+  CANCELED
 }
 
 model Chat {
-  id             String   @id @default(uuid())
-  senderId       String
-  receiveId      String
-  message        String
-  sent_at        DateTime @default(now())
-  read_status    Boolean
+  id          String   @id @default(uuid())
+  senderId    String
+  receiverId  String
+  sender      User     @relation("ChatSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User     @relation("ChatReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  message     String
+  sentAt      DateTime @default(now())
+  readStatus  Boolean
 }

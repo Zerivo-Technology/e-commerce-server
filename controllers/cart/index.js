@@ -27,7 +27,7 @@ class CartControllers {
                         id: existingCartItem.id,
                     },
                     data: {
-                        quantity: (parseInt(existingCartItem.quantity, 10) + 1).toString(),
+                        quantity: (parseInt(existingCartItem.quantity, 10) + 1),
                     },
                 });
 
@@ -41,7 +41,7 @@ class CartControllers {
                     data: {
                         productId: idProduct,
                         userId: userId,
-                        quantity: "1",
+                        quantity: 1,
                     },
                 });
 
@@ -81,7 +81,7 @@ class CartControllers {
                         id: checkProduct.id,
                     },
                     data: {
-                        quantity: (parseInt(checkProduct.quantity) - 1).toString(),
+                        quantity: (parseInt(checkProduct.quantity) - 1),
                     },
                 });
 

@@ -67,7 +67,12 @@ class ProductsControllers {
 
     static async getProducts(req, res, next) {
         try {
-            const getProduct = await prisma.product.findMany()
+            const getProduct = await prisma.product.findMany({
+                include: {
+                    category: true
+
+                }
+            })
             const response = returnSuccess(200, "Get Products Successfully, new Response", getProduct)
             // -- Return Response  -- //
             return res.status(response.statusCode).json(response.response)

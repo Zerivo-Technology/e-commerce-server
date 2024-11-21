@@ -70,11 +70,72 @@ class googleAuthControllers {
         }
     }
 
-    static async authenticationFacebook(req, res, next){
-        try{
+    static async authenticationFacebook(req, res, next) {
+        const { token } = req.body;
 
-        }catch(error){
-            
+        if (!token) {
+            return res.status(400).json({
+                status: 400,
+                message: 'Token is required',
+            });
+        }
+
+        try {
+            const { data: fbResponse } = await axios.get(
+                `https://graph.facebook.com/me?fields=id,name,email&access_token=${token}`
+            );
+
+            if (!fbResponse.email) {
+                return res.status(400).json({
+                    status: 400,
+                    message: 'Email not provided by Facebook',
+                });
+            }
+
+            const userPayload = {
+                id_facebook: fbResponse.id,
+                fullName: fbResponse.name,
+                email: fbResponse.email,
+            };
+
+            let user = await prisma.user.findUnique({
+                where: { email: userPayload.email },
+            });
+
+            if (!user) {
+                user = await prisma.user.create({
+                    data: {
+                        facebookId: userPayload.id_facebook,
+                        name: userPayload.fullName,
+                        email: userPayload.email,
+                        provider: 'facebook',
+                        role: 'user',
+                    },
+                });
+            }
+
+            const access_token = signToken({
+                id: user.id,
+                email: user.email,
+                role: user.role,
+            });
+
+            res.status(200).json({
+                status: 200,
+                message: 'Authentication Successfully',
+                data: {
+                    name: user.name,
+                    access_token,
+                    role: user.role,
+                },
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                status: 500,
+                message: 'Authentication Failed',
+                error: error.message,
+            });
         }
     }
 }

@@ -19,10 +19,20 @@ model User {
   providerId    String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  carts         Cart[]
   transactions  Transaction[]
+  biodatas      Biodata[]
+  carts         Cart[]
   sentChats     Chat[]   @relation("ChatSender")
   receivedChats Chat[]   @relation("ChatReceiver")
+}
+
+model Biodata{
+  id            String  @id @default(uuid())
+  userId        String
+  tanggal_lahir String
+  jenis_kelamin String  
+  alamatLengkap String
+  user          User @relation(references: [id], fields: [userId], onDelete: Cascade)
 }
 
 model Product {
@@ -31,11 +41,10 @@ model Product {
   about          String?
   categoryId     Int
   category       Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  age            Age
   image          String
-  quantity       Int
+  stoks          Int
   price          Float
-  carts          Cart[]
+  productItems    ProductItem[]
   transactionItems TransactionItem[]
 }
 
@@ -45,19 +54,20 @@ model Category {
   products     Product[]
 }
 
-enum Age {
-  MEN
-  WOMEN
-  KIDS
+model Cart {
+ id             String @id @default(uuid())
+ userId         String
+ user           User @relation(references: [id], fields: [userId], onDelete: Cascade)
+ productItems   ProductItem[]      
 }
 
-model Cart {
-  id          String   @id @default(uuid())
-  productId   String
-  userId      String
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  quantity    Int
+model ProductItem{
+  id            Int @id @default (autoincrement())
+  cartId        String 
+  productId     String
+  quantity      Int
+  carts         Cart @relation(references: [id], fields: [cartId], onDelete: Cascade)
+  products      Product @relation(references: [id], fields: [productId], onDelete: Cascade)
 }
 
 model Coupon {

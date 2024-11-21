@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const UserControllers = require('../controllers/user');
 const ProductsControllers = require('../controllers/products');
-const GoogleAuthControllers = require('../controllers/authentication')
+const AuthControllers = require('../controllers/authentication')
 const CartControllers = require('../controllers/cart');
 const CategoryControllers = require('../controllers/category');
 const multer = require('multer');
@@ -10,14 +10,21 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const { authenticateToken, authorizationOnlyAdmin } = require('../middlewares/auth');
 const CouponControllers = require('../controllers/coupon');
+const TransactionControllers = require('../controllers/transaction');
 
 // -- ROOT -- //
 
 router.post('/register', UserControllers.userRegister);
 router.post('/login', UserControllers.userLogin);
-router.post('/google', GoogleAuthControllers.authenticationGoogle);
+router.post('/google', AuthControllers.authenticationGoogle);
+router.post('/facebook', AuthControllers.authenticationFacebook);
 
 router.use(authenticateToken);
+
+// -- TRANSACTIONS -- //
+router.post('/transaction', TransactionControllers.addTransaction)
+
+// -- BIODATA -- //
 
 // -- PRODUCTS -- //
 router.get('/products', ProductsControllers.getProducts);
@@ -26,7 +33,7 @@ router.get('/products/:id', ProductsControllers.getProductById);
 // -- CARTS -- //
 router.get('/cart', CartControllers.getCartUserById);
 router.post('/cart', CartControllers.addCartProducts);
-router.delete('/cart/:id', CartControllers.deleteProductFromCart);
+router.delete('/cart/:productId', CartControllers.reduceProductFromCart);
 
 // -- COUPON -- //
 router.get('/coupon', CouponControllers.getAllCoupon);

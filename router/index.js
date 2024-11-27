@@ -5,12 +5,16 @@ const ProductsControllers = require('../controllers/products');
 const AuthControllers = require('../controllers/authentication')
 const CartControllers = require('../controllers/cart');
 const CategoryControllers = require('../controllers/category');
+const PaymentControllers = require('../controllers/payment')
 const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const { authenticateToken, authorizationOnlyAdmin } = require('../middlewares/auth');
 const CouponControllers = require('../controllers/coupon');
 const TransactionControllers = require('../controllers/transaction');
+const BiodataControllers = require('../controllers/biodata');
+const ChatControllers = require('../controllers/chat');
+const SizeControllers = require('../controllers/size');
 
 // -- ROOT -- //
 
@@ -22,13 +26,27 @@ router.post('/facebook', AuthControllers.authenticationFacebook);
 router.use(authenticateToken);
 
 // -- TRANSACTIONS -- //
-router.post('/transaction', TransactionControllers.addTransaction)
+router.delete('/transaction/:id', TransactionControllers.deleteTransaction)
+router.get('/transaction/:id', TransactionControllers.getTransactionItemDetails);
+router.post('/transaction', TransactionControllers.addTransaction);
+router.get('/transaction', TransactionControllers.getAllTransaction);
+
+// -- SIZE -- //
+router.get('/size', SizeControllers.getSize);
+router.post('/size', SizeControllers.addSize);
+router.delete('/size/:id', SizeControllers.deleteSize);
 
 // -- BIODATA -- //
+router.post('/biodata', BiodataControllers.addBiodata)
+router.get('/biodata', BiodataControllers.getMyBiodata)
 
 // -- PRODUCTS -- //
-router.get('/products', ProductsControllers.getProducts);
 router.get('/products/:id', ProductsControllers.getProductById);
+router.get('/products', ProductsControllers.getProducts);
+
+// -- CHAT -- //
+router.post('/chat/:receiverId', ChatControllers.addChat);
+router.delete('/chat/:chatId', ChatControllers.deleteChatId);
 
 // -- CARTS -- //
 router.get('/cart', CartControllers.getCartUserById);
@@ -37,6 +55,9 @@ router.delete('/cart/:productId', CartControllers.reduceProductFromCart);
 
 // -- COUPON -- //
 router.get('/coupon', CouponControllers.getAllCoupon);
+
+// -- PAYMENT BY MIDTRANS -- //
+router.get('/payment/:transactionId', PaymentControllers.PaymentMidtrans)
 
 // // --------------- ADMIN ACCESS --------------- //
 

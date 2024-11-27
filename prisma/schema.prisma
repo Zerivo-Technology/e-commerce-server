@@ -22,8 +22,8 @@ model User {
   transactions  Transaction[]
   biodatas      Biodata[]
   carts         Cart[]
-  sentChats     Chat[]   @relation("ChatSender")
-  receivedChats Chat[]   @relation("ChatReceiver")
+  chatsSent     Chat[] @relation("ChatSender")
+  chatsReceived Chat[] @relation("ChatReceiver")
 }
 
 model Biodata{
@@ -48,6 +48,12 @@ model Product {
   transactionItems TransactionItem[]
 }
 
+model Size {
+  id              Int  @id @default(autoincrement())
+  size            String
+  productItems    ProductItem[]
+}
+
 model Category {
   id           Int       @id @default(autoincrement())
   nameCategory String
@@ -65,7 +71,9 @@ model ProductItem{
   id            Int @id @default (autoincrement())
   cartId        String 
   productId     String
+  sizeId        Int
   quantity      Int
+  sizes         Size @relation(references: [id], fields: [sizeId], onDelete: Cascade)
   carts         Cart @relation(references: [id], fields: [cartId], onDelete: Cascade)
   products      Product @relation(references: [id], fields: [productId], onDelete: Cascade)
 }
@@ -78,6 +86,7 @@ model Coupon {
 
 model Transaction {
   id                String          @id @default(uuid())
+  order_id          String?  
   total             Int
   paymentMethod     String
   paymentStatus     Boolean         @default(false)
@@ -92,9 +101,9 @@ model TransactionItem {
   id            Int       @id @default(autoincrement())
   transactionId String
   productId     String
+  quantity      Int         @default(1)
   transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
   product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
-  quantity      Int         @default(1)
 }
 
 enum StatusPayment {

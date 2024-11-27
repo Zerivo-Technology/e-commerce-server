@@ -3,7 +3,7 @@ const Prisma = new PrismaClient();
 const { returnSuccess, returnError } = require('../../helpers/responseHandler');
 class CartControllers {
     static async addCartProducts(req, res, next) {
-        const { idProduct } = req.body;
+        const { idProduct, sizeId } = req.body;
         const userId = req.user.id;
 
         try {
@@ -24,7 +24,9 @@ class CartControllers {
             const existingProduct = await Prisma.productItem.findFirst({
                 where: {
                     cartId: existingCart.id,
-                    productId: idProduct
+                    productId: idProduct,
+                    sizeId: parseInt(sizeId)
+
                 },
             });
 
@@ -46,7 +48,8 @@ class CartControllers {
                 data: {
                     cartId: existingCart.id,
                     productId: idProduct,
-                    quantity: 1
+                    quantity: 1,
+                    sizeId: parseInt(sizeId)
                 }
             });
 
@@ -138,6 +141,7 @@ class CartControllers {
                 include: {
                     productItems: {
                         include: {
+                            sizes: true,
                             products: {
                                 include: {
                                     stoks: false,

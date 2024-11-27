@@ -80,38 +80,38 @@ async function main() {
         },
     ];
 
-    // const categories = [
-    //     {
-    //         id: 1,
-    //         nameCategory: "Men"
-    //     },
-    //     {
-    //         id: 2,
-    //         nameCategory: "Women"
-    //     },
-    //     {
-    //         id: 3,
-    //         nameCategory: "Bag"
-    //     },
-    //     {
-    //         id: 4,
-    //         nameCategory: "Shoes"
-    //     },
-    //     {
-    //         id: 5,
-    //         nameCategory: "Clothes"
-    //     },
-    // ]
+    const categories = [
+        {
+            id: 1,
+            nameCategory: "Men"
+        },
+        {
+            id: 2,
+            nameCategory: "Women"
+        },
+        {
+            id: 3,
+            nameCategory: "Bag"
+        },
+        {
+            id: 4,
+            nameCategory: "Shoes"
+        },
+        {
+            id: 5,
+            nameCategory: "Clothes"
+        },
+    ]
 
     // Data Category //
-    // for (const category of categories) {
-    //     await Prisma.category.create({
-    //         data: {
-    //             id: category.id,
-    //             nameCategory: category.nameCategory
-    //         }
-    //     })
-    // }
+    for (const category of categories) {
+        await Prisma.category.create({
+            data: {
+                id: category.id,
+                nameCategory: category.nameCategory
+            }
+        })
+    }
 
     // Insert Users
     // for (const user of users) {

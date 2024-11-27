@@ -1,98 +1,158 @@
 const { PrismaClient } = require('@prisma/client');
-const { returnError } = require('../../helpers/responseHandler');
-const Prisma = new PrismaClient()
+const { returnSuccess, returnError } = require('../../helpers/responseHandler');
+const prisma = new PrismaClient();
 
-
-class TransactionControllers {
+class TransactionHandler {
     static async addTransaction(req, res, next) {
-        const userId = req.user.id;
-
         try {
-            const cartItems = await Prisma.cart.findMany({
-                where: { userId: userId },
-                include: { product: true }
-            })
+            const userId = req.user.id;
+            const { paymentMethod, selectedProductIds } = req.body;
 
-            if (!cartItems || cartItems.length === 0) {
-                return res.status(400).json({ status: 'error', message: 'Keranjang kosong' });
+            if (!userId || !paymentMethod || !Array.isArray(selectedProductIds) || selectedProductIds.length === 0) {
+                return res.status(400).json({
+                    message: "userId, paymentMethod, dan selectedProductIds harus disediakan.",
+                });
             }
 
-            let totalPrice = 0;
-            const transactionItems = cartItems.map((item) => {
-                const subTotal = item.product.price * item.quantity;
-                totalPrice += subTotal
-                return {
-                    productId: item.productId,
-                    quantity: item.quantity
-                }
-            })
+            const cartItems = await prisma.productItem.findMany({
+                where: {
+                    carts: { userId },
+                    productId: { in: selectedProductIds },
+                },
+                include: {
+                    products: true,
+                },
+            });
 
-            const newTransaction = await Prisma.transaction.create({
+            if (cartItems.length === 0) {
+                return res.status(404).json({
+                    message: "Tidak ada item yang ditemukan di keranjang dengan produk yang dipilih.",
+                });
+            }
+
+            const total = cartItems.reduce((acc, item) => {
+                return acc + item.products.price * item.quantity;
+            }, 0);
+
+            const timestamp = new Date().getTime();
+            const orderId = `${timestamp}`;
+
+            const transaction = await prisma.transaction.create({
                 data: {
-                    total: totalPrice,
-                    paymentMethod: 'midtrans',
+                    userId,
+                    order_id: orderId,
+                    total,
+                    paymentMethod,
                     paymentStatus: false,
-                    userId: userId
-                }
-            })
-
-            for (const item of transactionItems) {
-                await Prisma.transactionItem.create({
-                    data: {
-                        transactionId: newTransaction.id,
-                        productId: item.productId,
-                        quantity: item.quantity
-                    }
-                })
-            }
-
-            await Prisma.cart.deleteMany({ where: { userId: userId } });
-
-            const snap = new midtransClient.Snap({
-                isProduction: false,
-                serveKey: process.env.MIDTRANS_SERVER_KEY,
-                clientKey: process.env.MIDTRANS_CLIENT_KEY
-            })
-
-            const parameter = {
-                transaction_details: {
-                    order_id: `ORDER-${newTransaction.id}`,
-                    gross_amount: totalPrice
+                    transactionItems: {
+                        create: cartItems.map((item) => ({
+                            productId: item.productId,
+                            quantity: item.quantity,
+                            size: item.sizeId
+                        })),
+                    },
                 },
-                customer_details: {
-                    email: req.user.email,
-                    phone: req.user.phoneNumber,
-                },
-                item_details: cartItems.map((item) => ({
-                    id: item.productId,
-                    price: item.product.price,
-                    quantity: item.quantity,
-                    name: item.product.nameProduct,
-                })),
-            }
-
-            const midtransResponse = await snap.createTransaction(parameter);
-
-            return res.status(201).json({
-                status: 'success',
-                message: 'Transaksi berhasil dibuat',
-                data: {
-                    transactionId: newTransaction.id,
-                    snapToken: midtransResponse.token,
-                    paymentUrl: midtransResponse.redirect_url,
+                include: {
+                    transactionItems: true,
                 },
             });
 
+            await prisma.productItem.deleteMany({
+                where: {
+                    carts: { userId },
+                    productId: { in: selectedProductIds },
+                },
+            });
+
+            res.status(200).json({
+                status: 200,
+                message: "New Transaction Created",
+                data: transaction
+            })
         } catch (error) {
-            console.error('Error creating transaction:', error);
-            return res.status(500).json({
-                status: 'error',
-                message: 'Gagal membuat transaksi',
-                error: error.message,
-            });
+            console.error("Error in addTransaction:", error);
+            next(error);
         }
     }
+
+
+
+    static async getAllTransaction(req, res, next) {
+        const idUser = req.user.id
+        try {
+            const myTransaction = await prisma.transaction.findMany({
+                where: {
+                    userId: idUser
+                }
+            });
+
+            const response = returnSuccess(200, "Berhasil mendapatkan semua transaksi", myTransaction);
+
+            return res.status(response.statusCode).json(response.response);
+            next()
+        } catch (error) {
+            const response = returnError(400, "Gagal mendapatkan transaksi");
+
+            return res.status(response.statusCode).json(response.response)
+        }
+    }
+
+    static async getTransactionItemDetails(req, res, next) {
+        const { id } = req.params;
+
+        try {
+            const getTransactionById = await prisma.transaction.findUnique({
+                where: { id },
+                include: {
+                    transactionItems: {
+                        include: {
+                            product: true,
+                        },
+                    },
+                },
+            });
+
+            if (!getTransactionById) {
+                const response = returnError(404, "Transaction not found");
+                return res.status(response.statusCode).json(response.response);
+            }
+
+            const response = returnSuccess(
+                200,
+                "Get Details Transaction Successfully",
+                getTransactionById
+            );
+
+            return res.status(response.statusCode).json(response.response);
+        } catch (error) {
+            console.error(error);
+
+            const response = returnError(500, "Get Details Transaction failed");
+            return res.status(response.statusCode).json(response.response);
+        }
+    }
+
+
+    static async deleteTransaction(req, res, next) {
+        const { id } = req.params
+        try {
+            const deleteTransaction = await prisma.transaction.delete({
+                where: {
+                    id: id
+                }
+            })
+
+            res.status(200).json({
+                status: 200,
+                message: "Delete transaction Successfully",
+                data: deleteTransaction
+            })
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
 }
 
-
-module.exports = TransactionControllers
+module.exports = TransactionHandler;

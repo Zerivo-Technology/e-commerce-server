@@ -4,7 +4,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const morgan = require('morgan');
-const PORT = 3000;
+const PORT = 3000 || process.env.PORT;
 const router = require('./router/index.js');
 // -- IMPELEMENTATION -- //
 app.use(express.urlencoded({ extended: true }))

@@ -103,7 +103,7 @@ async function main() {
         },
     ]
 
-    // Data Category //
+    // // Data Category //
     for (const category of categories) {
         await Prisma.category.create({
             data: {
@@ -135,7 +135,7 @@ async function main() {
         });
     }
 
-    console.log("Seeding completed!");
+    //     console.log("Seeding completed!");
 }
 
 main()

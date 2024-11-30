@@ -68,21 +68,38 @@ class ProductsControllers {
     static async getProducts(req, res, next) {
         try {
             const getProduct = await prisma.product.findMany({
-                include: {
-                    category: true
-
+                select: {
+                    id: true,
+                    nameProduct: true,
+                    about: true,
+                    categoryId: true,
+                    image: true,
+                    stoks: true,
+                    price: true,
+                    category: {
+                        select: {
+                            nameCategory: true,  // hanya pilih nama kategori
+                        }
+                    }
                 }
-            })
-            const response = returnSuccess(200, "Get Products Successfully, new Response", getProduct)
-            // -- Return Response  -- //
-            return res.status(response.statusCode).json(response.response)
+            });
+
+            // Flatten the data so nameCategory is part of the product object
+            const products = getProduct.map(product => ({
+                ...product,
+                nameCategory: product.category.nameCategory, // Ambil nameCategory dan letakkan di level atas
+                category: undefined  // Menghapus objek category yang tidak diperlukan lagi
+            }));
+
+            const response = returnSuccess(200, "Get Products Successfully, new Response", products);
+            return res.status(response.statusCode).json(response.response);
         } catch (error) {
             console.error('Error get product:', error);
-            const response = returnError(400, "Get Products Failed")
-            // -- Return Response  -- //
+            const response = returnError(400, "Get Products Failed");
             return res.status(response.statusCode).json(response.response);
         }
     }
+
 
     static async getProductById(req, res, next) {
         const { id } = req.params
@@ -108,9 +125,7 @@ class ProductsControllers {
                     id: id
                 }
             })
-
             const response = returnSuccess(200, 'Delete Product Successfully', deleteProducts)
-
             res.status(response.statusCode).json(response.response)
         } catch (error) {
             console.log(error)

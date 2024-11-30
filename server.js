@@ -4,16 +4,38 @@ const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const morgan = require('morgan');
-const PORT = 3000 || process.env.PORT;
+const http = require('http');
+const { Server } = require('socket.io');
 const router = require('./router/index.js');
-// -- IMPELEMENTATION -- //
-app.use(express.urlencoded({ extended: true }))
+
+const PORT = 3000;
+
+// -- IMPLEMENTASI -- //
+app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(cors());
 app.use(bodyParser.json());
-app.use(router)
+app.use(router);
 
+const server = http.createServer(app);
 
-app.listen(PORT, () => {
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"],
+    },
+});
+
+global.io = io;
+
+io.on('connection', (socket) => {
+    console.log(`User connected: ${socket.id}`);
+
+    socket.on('disconnect', () => {
+        console.log(`User disconnected: ${socket.id}`);
+    });
+});
+
+server.listen(PORT, () => {
     console.log(`Server Berjalan http://localhost:${PORT}`);
-})
+});

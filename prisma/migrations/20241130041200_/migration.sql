@@ -22,7 +22,7 @@ CREATE TABLE `Biodata` (
     `userId` VARCHAR(191) NOT NULL,
     `tanggal_lahir` VARCHAR(191) NOT NULL,
     `jenis_kelamin` VARCHAR(191) NOT NULL,
-    `alamatLengkap` VARCHAR(191) NOT NULL,
+    `alamat_lengkap` VARCHAR(191) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -79,6 +79,7 @@ CREATE TABLE `ProductItem` (
 CREATE TABLE `Coupon` (
     `id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
+    `expire_date` DATETIME(3) NOT NULL,
     `cut_price` DOUBLE NOT NULL,
 
     PRIMARY KEY (`id`)
@@ -88,6 +89,7 @@ CREATE TABLE `Coupon` (
 CREATE TABLE `Transaction` (
     `id` VARCHAR(191) NOT NULL,
     `order_id` VARCHAR(191) NULL,
+    `couponId` VARCHAR(191) NOT NULL,
     `total` INTEGER NOT NULL,
     `paymentMethod` VARCHAR(191) NOT NULL,
     `paymentStatus` BOOLEAN NOT NULL DEFAULT false,
@@ -102,7 +104,7 @@ CREATE TABLE `Transaction` (
 CREATE TABLE `TransactionItem` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `transactionId` VARCHAR(191) NOT NULL,
-    `productId` VARCHAR(191) NOT NULL,
+    `productItemsId` INTEGER NOT NULL,
     `quantity` INTEGER NOT NULL DEFAULT 1,
 
     PRIMARY KEY (`id`)
@@ -142,10 +144,13 @@ ALTER TABLE `ProductItem` ADD CONSTRAINT `ProductItem_productId_fkey` FOREIGN KE
 ALTER TABLE `Transaction` ADD CONSTRAINT `Transaction_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `Transaction` ADD CONSTRAINT `Transaction_couponId_fkey` FOREIGN KEY (`couponId`) REFERENCES `Coupon`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `TransactionItem` ADD CONSTRAINT `TransactionItem_transactionId_fkey` FOREIGN KEY (`transactionId`) REFERENCES `Transaction`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `TransactionItem` ADD CONSTRAINT `TransactionItem_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `TransactionItem` ADD CONSTRAINT `TransactionItem_productItemsId_fkey` FOREIGN KEY (`productItemsId`) REFERENCES `ProductItem`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Chat` ADD CONSTRAINT `Chat_senderId_fkey` FOREIGN KEY (`senderId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

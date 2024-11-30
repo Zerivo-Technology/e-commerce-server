@@ -66,8 +66,8 @@ class CartControllers {
 
 
     static async reduceProductFromCart(req, res, next) {
-        const { productId } = req.params; // ID produk dari parameter URL
-        const userId = req.user.id; // ID pengguna dari middleware auth
+        const { productId } = req.params;
+        const userId = req.user.id;
 
         try {
             // Cari keranjang pengguna
@@ -85,7 +85,6 @@ class CartControllers {
                 return res.status(response.statusCode).json(response.response);
             }
 
-            // Cari produk dalam keranjang
             const productItem = await Prisma.productItem.findFirst({
                 where: {
                     cartId: cart.id,
@@ -113,14 +112,13 @@ class CartControllers {
                 return res.status(response.statusCode).json(response.response);
             }
 
-            // Jika quantity 1, hapus produk dari keranjang
             await Prisma.productItem.delete({
                 where: {
                     id: productItem.id
                 }
             });
 
-            const response = returnSuccess(200, "Product removed from cart", null);
+            const response = returnSuccess(200, "Product removed from cart", productId);
             return res.status(response.statusCode).json(response.response);
         } catch (error) {
             console.error("Error while reducing product quantity:", error);
@@ -141,7 +139,11 @@ class CartControllers {
                 include: {
                     productItems: {
                         include: {
-                            sizes: true,
+                            sizes: {
+                                select: {
+                                    size: true
+                                }
+                            },
                             products: {
                                 include: {
                                     stoks: false,

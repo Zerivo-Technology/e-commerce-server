@@ -2,41 +2,39 @@ const { PrismaClient } = require('@prisma/client');
 const Prisma = new PrismaClient();
 
 async function main() {
-    // Data Users
-    // const users = [
-    //     {
-    //         id: "6dcd07fa-f12a-4ef7-92be-256feb3d0f4a",
-    //         name: "admin",
-    //         email: "admin@gmail.com",
-    //         password: "$2a$10$kcVWcGjq6MO.BJ1WFW0OSe3fz7AjxRbyTz65nqV93nCsepLH95KFS",
-    //         phoneNumber: "000000000",
-    //         role: "admin",
-    //         provider: "local",
-    //         providerId: null,
-    //     },
-    //     {
-    //         id: "e1fccbd8-50ac-4461-ada9-bbbba5632a3c",
-    //         name: "Alif farid rahman",
-    //         email: "alif.faridrhmn60@gmail.com",
-    //         password: "$2a$10$.jbI/it1UZ5daOeCq.wd5.otnHfzzVtUxDjJDVtEdizB81cTxWbr2",
-    //         phoneNumber: "000000000",
-    //         role: "user",
-    //         provider: "local",
-    //         providerId: null,
-    //     },
-    //     {
-    //         id: "ad8927b6-520f-4971-aed6-238eb9de7a1f",
-    //         name: "Ratih",
-    //         email: "Ratihmulia.com",
-    //         password: "$2a$10$H/6UeDTwwgbz2e.54F0Vee6sROUoLXUq55qg15m2F1fJj0mU9xUla",
-    //         phoneNumber: "000000000",
-    //         role: "user",
-    //         provider: "local",
-    //         providerId: null,
-    //     },
-    // ];
-    //
-    // Data Products
+    const users = [
+        {
+            id: "6dcd07fa-f12a-4ef7-92be-256feb3d0f4a",
+            name: "admin",
+            email: "admin@gmail.com",
+            password: "$2a$10$kcVWcGjq6MO.BJ1WFW0OSe3fz7AjxRbyTz65nqV93nCsepLH95KFS",
+            phoneNumber: "000000000",
+            role: "admin",
+            provider: "local",
+            providerId: null,
+        },
+        {
+            id: "e1fccbd8-50ac-4461-ada9-bbbba5632a3c",
+            name: "Alif farid rahman",
+            email: "alif.faridrhmn60@gmail.com",
+            password: "$2a$10$.jbI/it1UZ5daOeCq.wd5.otnHfzzVtUxDjJDVtEdizB81cTxWbr2",
+            phoneNumber: "000000000",
+            role: "user",
+            provider: "local",
+            providerId: null,
+        },
+        {
+            id: "ad8927b6-520f-4971-aed6-238eb9de7a1f",
+            name: "Ratih",
+            email: "Ratihmulia.com",
+            password: "$2a$10$H/6UeDTwwgbz2e.54F0Vee6sROUoLXUq55qg15m2F1fJj0mU9xUla",
+            phoneNumber: "000000000",
+            role: "user",
+            provider: "local",
+            providerId: null,
+        },
+    ];
+
     const products = [
         {
             id: "acda7a57-cac4-425d-ba4b-6538c5b0bb35",
@@ -103,7 +101,37 @@ async function main() {
         },
     ]
 
-    // // Data Category //
+    const sizes = [
+        {
+            id: 1,
+            size: "S"
+        },
+        {
+            id: 2,
+            size: "M"
+        },
+        {
+            id: 3,
+            size: "L"
+        },
+        {
+            id: 4,
+            size: "XL"
+        }
+
+    ]
+
+    // // Data Size //
+    for (const size of sizes) {
+        await Prisma.size.create({
+            data: {
+                id: size.id,
+                size: size.size
+            }
+        })
+    }
+
+
     for (const category of categories) {
         await Prisma.category.create({
             data: {
@@ -113,12 +141,12 @@ async function main() {
         })
     }
 
-    // Insert Users
-    // for (const user of users) {
-    //     await Prisma.user.create({ data: user });
-    // }
 
-    // Insert Products
+    for (const user of users) {
+        await Prisma.user.create({ data: user });
+    }
+
+
     for (const product of products) {
         await Prisma.product.create({
             data: {
@@ -135,7 +163,7 @@ async function main() {
         });
     }
 
-    //     console.log("Seeding completed!");
+    console.log("Seeding completed!");
 }
 
 main()

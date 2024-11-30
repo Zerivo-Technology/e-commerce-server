@@ -27,12 +27,12 @@ model User {
 }
 
 model Biodata{
-  id            String  @id @default(uuid())
-  userId        String
-  tanggal_lahir String
-  jenis_kelamin String  
-  alamatLengkap String
-  user          User @relation(references: [id], fields: [userId], onDelete: Cascade)
+  id                String  @id @default(uuid())
+  userId            String
+  tanggal_lahir     String
+  jenis_kelamin     String  
+  alamat_lengkap    String
+  user              User @relation(references: [id], fields: [userId], onDelete: Cascade)
 }
 
 model Product {
@@ -44,8 +44,7 @@ model Product {
   image          String
   stoks          Int
   price          Float
-  productItems    ProductItem[]
-  transactionItems TransactionItem[]
+  productItems   ProductItem[]
 }
 
 model Size {
@@ -76,17 +75,21 @@ model ProductItem{
   sizes         Size @relation(references: [id], fields: [sizeId], onDelete: Cascade)
   carts         Cart @relation(references: [id], fields: [cartId], onDelete: Cascade)
   products      Product @relation(references: [id], fields: [productId], onDelete: Cascade)
+  trasactionItems TransactionItem[]
 }
 
 model Coupon {
-  id         String @id @default(uuid())
-  name       String
-  cut_price  Float
+  id            String @id @default(uuid())
+  name          String
+  expire_date   DateTime
+  cut_price     Float
+  transactions Transaction[]
 }
 
 model Transaction {
   id                String          @id @default(uuid())
-  order_id          String?  
+  order_id          String?
+  couponId          String  
   total             Int
   paymentMethod     String
   paymentStatus     Boolean         @default(false)
@@ -95,15 +98,16 @@ model Transaction {
   transactionItems  TransactionItem[]
   userId            String
   user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coupons           Coupon          @relation(fields: [couponId], references: [id])
 }
 
 model TransactionItem {
-  id            Int       @id @default(autoincrement())
-  transactionId String
-  productId     String
-  quantity      Int         @default(1)
-  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
-  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id                  Int            @id @default(autoincrement())
+  transactionId       String
+  productItemsId      Int
+  quantity            Int           @default(1)
+  transaction         Transaction   @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  productItems        ProductItem   @relation(fields: [productItemsId], references: [id], onDelete: Cascade)
 }
 
 enum StatusPayment {

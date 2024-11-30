@@ -10,11 +10,9 @@ class ChatControllers {
         const { message } = req.body;
 
         try {
-
             if (!SenderId || !receiverId || !message) {
                 return res.status(400).json({ error: 'Sender, Receiver, and Message are required.' });
             }
-
 
             const receiverExists = await prisma.user.findUnique({
                 where: { id: receiverId },
@@ -22,7 +20,6 @@ class ChatControllers {
             if (!receiverExists) {
                 return res.status(404).json({ error: 'Receiver not found.' });
             }
-
 
             const newChat = await prisma.chat.create({
                 data: {
@@ -33,13 +30,12 @@ class ChatControllers {
                 },
             });
 
-
-            io.emit(`chat:${receiverId}`, {
+            // Emit pesan ke receiver melalui socket
+            global.io.emit(`chat:${receiverId}`, {
                 message: newChat.message,
                 senderId: newChat.senderId,
                 sentAt: newChat.sentAt,
             });
-
 
             res.status(200).json({
                 status: 200,
@@ -51,6 +47,7 @@ class ChatControllers {
             res.status(500).json({ error: 'An error occurred while adding the chat.' });
         }
     }
+
 
     static async deleteChatId(req, res, next) {
         const { chatId } = req.params

@@ -19,6 +19,7 @@ class CategoryControllers {
             const response = returnError(400, 'Create new category has failed');
             // Return Responses //
             res.status(response.statusCode).json(response.response)
+            console.log(error)
         }
     }
 

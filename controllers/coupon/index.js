@@ -16,26 +16,46 @@ class CouponControllers {
     }
 
     static async addCoupon(req, res, next) {
-        const { name, cut_price } = req.body
+        const { name, cut_price, expire_date } = req.body;
+
         try {
+            if (!expire_date) {
+                return res.status(400).json({
+                    status: 400,
+                    message: 'Expire date is required',
+                });
+            }
+
+            const parsedExpireDate = new Date(expire_date);
+
+            if (isNaN(parsedExpireDate.getTime())) {
+                return res.status(400).json({
+                    status: 400,
+                    message: 'Invalid expire date format, use YYYY-MM-DD',
+                });
+            }
+
+            parsedExpireDate.setHours(0, 0, 0, 0);
+
             const newCoupon = await Prisma.coupon.create({
                 data: {
                     name,
-                    cut_price
-                }
-            })
-            const response = returnSuccess(200, 'Add Coupon SuccessFully', newCoupon)
+                    cut_price,
+                    expire_date: parsedExpireDate,
+                },
+            });
 
-            // -- Return Respons -- //
-            res.status(response.statusCode).json(response.response)
+            const response = returnSuccess(200, 'Add Coupon Successfully', newCoupon);
+
+            // -- Return Response -- //
+            res.status(response.statusCode).json(response.response);
 
         } catch (error) {
-
-            const response = returnError(400, "Add Coupon Failed", error)
-
-            res.status(response.statusCode).json(response.response)
+            const response = returnError(400, "Add Coupon Failed", error);
+            res.status(response.statusCode).json(response.response);
         }
     }
+
 
     static async deleteCoupon(req, res, next) {
         const { id } = req.params;

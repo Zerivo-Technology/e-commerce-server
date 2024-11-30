@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 class BiodataControllers {
     static async addBiodata(req, res, next) {
         const userId = req.user.id;
-        const { tanggal_lahir, jenis_kelamin, alamatLengkap } = req.body;
+        const { tanggal_lahir, jenis_kelamin, alamat_lengkap } = req.body;
 
         try {
             const checkBiodataUser = await prisma.biodata.findFirst({
@@ -20,7 +20,7 @@ class BiodataControllers {
                         userId,
                         tanggal_lahir,
                         jenis_kelamin,
-                        alamatLengkap,
+                        alamat_lengkap,
                     },
                 });
 
@@ -36,7 +36,7 @@ class BiodataControllers {
                     data: {
                         tanggal_lahir,
                         jenis_kelamin,
-                        alamatLengkap,
+                        alamat_lengkap,
                     },
                 });
 

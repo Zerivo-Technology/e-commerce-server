@@ -33,8 +33,6 @@ router.get('/transaction', TransactionControllers.getAllTransaction);
 
 // -- SIZE -- //
 router.get('/size', SizeControllers.getSize);
-router.post('/size', SizeControllers.addSize);
-router.delete('/size/:id', SizeControllers.deleteSize);
 
 // -- BIODATA -- //
 router.post('/biodata', BiodataControllers.addBiodata)
@@ -66,11 +64,22 @@ router.delete('/category/:id', authorizationOnlyAdmin, CategoryControllers.delet
 router.get('/category', authorizationOnlyAdmin, CategoryControllers.getAllCategory);
 router.post('/category', authorizationOnlyAdmin, CategoryControllers.addCategory);
 router.put('/category/:id', authorizationOnlyAdmin, CategoryControllers.updateCategory);
+
 // -- Products By Admin -- //
 router.post('/products', upload.single('image'), authorizationOnlyAdmin, ProductsControllers.addProduct);
 router.delete('/products/:id', authorizationOnlyAdmin, ProductsControllers.deleteProducts)
+
+// -- Size By Admin -- //
+router.post('/size', authorizationOnlyAdmin, SizeControllers.addSize);
+router.delete('/size/:id', authorizationOnlyAdmin, SizeControllers.deleteSize);
+
 // -- User By Admin -- //
 router.get('/user', authorizationOnlyAdmin, UserControllers.getAllUser);
+router.get('/user/:id', authorizationOnlyAdmin, UserControllers.getUserById);
+router.post('/user', authorizationOnlyAdmin, UserControllers.addUser);
+router.put('/user/:id', authorizationOnlyAdmin, UserControllers.updateUser);
+router.delete('/user/:id', authorizationOnlyAdmin, UserControllers.deleteUserById);
+
 // -- Coupon By Admin -- //
 router.post('/coupon', authorizationOnlyAdmin, CouponControllers.addCoupon);
 router.delete('/coupon/:id', authorizationOnlyAdmin, CouponControllers.deleteCoupon);
